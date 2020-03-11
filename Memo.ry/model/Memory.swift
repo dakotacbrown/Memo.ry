@@ -12,7 +12,10 @@ import CoreData
 public class Memory: NSManagedObject, Identifiable {
     @NSManaged public var createdAt: String
     @NSManaged public var title: String
+    @NSManaged public var isDone: Bool
 }
+
+
 
 extension Memory {
     static func getAllMemories() -> NSFetchRequest<Memory> {

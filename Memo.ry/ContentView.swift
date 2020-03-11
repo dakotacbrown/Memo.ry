@@ -12,12 +12,10 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
     @FetchRequest(fetchRequest: Memory.getAllMemories()) var memories: FetchedResults<Memory>
     
-    
     @State var newMemory: String = ""
     @State var timeAgo: String = ""
     var formatter = DateFormatter()
     var isChanged: Bool = false
-    
     
     var body: some View {
         NavigationView {
@@ -35,13 +33,11 @@ struct ContentView: View {
                             self.formatter.timeStyle = .medium
                             self.timeAgo = self.formatter.string(from: Date())
                             memory.createdAt = self.timeAgo
-                            
                             do {
                                 try self.managedObjectContext.save()
                             } catch {
                                 let nserror = error as NSError
                                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-
                             }
                             self.newMemory = ""
                         }.padding(.all, 12)
@@ -52,7 +48,7 @@ struct ContentView: View {
                         .padding(.trailing, 8)
                 }
                 List { ForEach(self.memories) { item in
-                    Row(memoryItem: item.title, timeAgo: item.createdAt)
+                    Row(context: self.managedObjectContext, mainMemory: item)
                 }.onDelete { indexSet in
                     let deleteItem = self.memories[indexSet.first!]
                     self.managedObjectContext.delete(deleteItem)
@@ -69,11 +65,5 @@ struct ContentView: View {
             }.navigationBarTitle("Memo.ry")
                 .navigationBarItems(trailing: EditButton())
         }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }

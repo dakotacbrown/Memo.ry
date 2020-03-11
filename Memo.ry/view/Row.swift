@@ -7,49 +7,53 @@
 //
 
 import SwiftUI
+import UIKit
+import Foundation
+import CoreData
 
 struct Row: View {
-    @State var memoryItem: String = ""
-    @State var timeAgo: String = ""
-    @State var isDone: Bool = false
+    var context: NSManagedObjectContext
+    var mainMemory: Memory
     var formatter = DateFormatter()
     
     var body: some View {
         VStack(alignment: .center, spacing: 2) {
             Group {
                 HStack {
-                    Text(memoryItem)
+                    Text(self.mainMemory.title)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                     
                     Spacer()
                     
-                    Image(systemName: (self.isDone) ? "checkmark" : "square")
+                    Image(systemName: (self.mainMemory.isDone) ? "checkmark" : "square")
                         .padding()
                 }
                 HStack(alignment: .center, spacing: 3){
                     Spacer()
-                    Text((self.isDone) ? "Completed: " + self.timeAgo : "Added: " + self.timeAgo)
+                    Text((self.mainMemory.isDone) ? "Completed: " + self.mainMemory.createdAt : "Added: " + self.mainMemory.createdAt)
                         .foregroundColor(.white)
                         .italic()
                         .padding(.all, 4)
                 }.padding(.bottom, 5)
             }.padding(.all, 4)
-        }.opacity((self.isDone) ? 0.3 : 1.0 )
-        .background((self.isDone) ? Color.gray : Color.blue)
+        }.opacity((self.mainMemory.isDone) ? 0.3 : 1.0 )
+        .background((self.mainMemory.isDone) ? Color.gray : Color.blue)
             .clipShape(RoundedRectangle(cornerRadius: 5))
+            .animation(.spring())
+            .offset(x: self.mainMemory.isDone ? -100: 0)
             .onTapGesture {
-                self.isDone.toggle()
+                self.mainMemory.isDone.toggle()
                 self.formatter.dateStyle = .short
                 self.formatter.timeStyle = .medium
-                self.timeAgo = self.formatter.string(from: Date())
+                self.mainMemory.createdAt = self.formatter.string(from: Date())
+                do {
+                    try self.context.save()
+                } catch {
+                    let nserror = error as NSError
+                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                }
         }
-    }
-}
-
-struct Row_Previews: PreviewProvider {
-    static var previews: some View {
-        Row()
     }
 }
